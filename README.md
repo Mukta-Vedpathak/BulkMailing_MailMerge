@@ -5,4 +5,5 @@ Bulk emailing and mail merge are indispensable tools for efficient and personali
 
 ### Video Demonstration:
 https://drive.google.com/file/d/1dxwO8zb7Q70nI3y6tby0WAHb7EMANDpb/view
+
 https://drive.google.com/file/d/1LYKqrMmqhGrHjHQNWGEK-z5s9yzQTGYJ/view?usp=sharing
