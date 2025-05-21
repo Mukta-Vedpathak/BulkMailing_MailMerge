@@ -1,0 +1,8 @@
+fastapi
+slowapi
+aiosmtplib
+pydantic
+python-dotenv
+python-multipart
+email-validator
+uvicorn

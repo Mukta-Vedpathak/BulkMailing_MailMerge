@@ -1,0 +1,12 @@
+{
+    "Welcome": {
+        "name": "Welcome",
+        "subject": "Welcome to {company}!",
+        "body": "Dear {name},\r\n\r\nWelcome to {company}! We're excited to have you on board.\r\n\r\nBest regards,\r\n{sender_name}",
+        "variables": [
+            "company",
+            "name",
+            "sender_name"
+        ]
+    }
+}

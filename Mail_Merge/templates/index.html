@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Email Sender</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-container">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-envelope-open-text me-2"></i>
+                Bulk Email Sender
+            </h1>
+            
+            <!-- Flash Messages -->
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#send-email">
+                        <i class="fas fa-paper-plane me-2"></i>Send Email
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#manage-templates">
+                        <i class="fas fa-file-alt me-2"></i>Manage Templates
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Send Email Tab -->
+                <div class="tab-pane fade show active" id="send-email">
+                    <form method="POST" enctype="multipart/form-data" id="email-form">
+                        {{ form.csrf_token }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="section-title">
+                                    <i class="fas fa-user me-2"></i>Sender Details
+                                </h4>
+                                <div class="mb-3">
+                                    {{ form.sender_email.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-at"></i>
+                                        </span>
+                                        {{ form.sender_email(class="form-control") }}
+                                    </div>
+                                    {% if form.sender_email.errors %}
+                                        {% for error in form.sender_email.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.sender_password.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-key"></i>
+                                        </span>
+                                        {{ form.sender_password(class="form-control", type="password") }}
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Use an App Password if using Gmail. 
+                                        <a href="https://myaccount.google.com/apppasswords" target="_blank">
+                                            Generate one here
+                                        </a>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h4 class="section-title">
+                                    <i class="fas fa-envelope me-2"></i>Email Content
+                                </h4>
+                                <div class="mb-3">
+                                    {{ form.template.label(class="form-label") }}
+                                    {{ form.template(class="form-control") }}
+                                    <div class="template-variables bg-light p-2 mt-2 rounded" style="display: none;">
+                                        <i class="fas fa-tags me-2"></i>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h4 class="section-title">
+                                    <i class="fas fa-users me-2"></i>Recipients
+                                </h4>
+                                <div class="mb-3">
+                                    {{ form.recipients.label(class="form-label") }}
+                                    {{ form.recipients(class="form-control", rows=3) }}
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Format: email,variable1=value1,variable2=value2
+                                        <br>
+                                        Example: john@example.com,name=John,company=Acme Inc
+                                    </small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.cc.label(class="form-label") }}
+                                            {{ form.cc(class="form-control", rows=2) }}
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Enter one email address per line
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.bcc.label(class="form-label") }}
+                                            {{ form.bcc(class="form-control", rows=2) }}
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Enter one email address per line
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h4 class="section-title">
+                                    <i class="fas fa-pen me-2"></i>Message
+                                </h4>
+                                <div class="mb-3">
+                                    {{ form.subject.label(class="form-label") }}
+                                    {{ form.subject(class="form-control") }}
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Use {variable_name} for personalization
+                                    </small>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.body.label(class="form-label") }}
+                                    {{ form.body(class="form-control", rows=6) }}
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Use {variable_name} for personalization
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h4 class="section-title">
+                                    <i class="fas fa-paperclip me-2"></i>Attachments
+                                </h4>
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        {{ form.attachments(class="form-control", id="attachments-input") }}
+                                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('attachments-input').value = ''">
+                                            <i class="fas fa-times"></i> Clear
+                                        </button>
+                                    </div>
+                                    <div id="attachment-preview" class="attachment-preview"></div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        You can select multiple files
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Send Emails
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Manage Templates Tab -->
+                <div class="tab-pane fade" id="manage-templates">
+                    <!-- Existing Templates List -->
+                    <div class="mb-4">
+                        <h4 class="section-title">
+                            <i class="fas fa-list me-2"></i>Existing Templates
+                        </h4>
+                        <div class="template-list">
+                            {% for template_name in form.template.choices[1:] %}
+                            <div class="template-item" data-template="{{ template_name[0] }}">
+                                <div class="template-info">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    <span class="template-name">{{ template_name[0] }}</span>
+                                </div>
+                                <div class="template-actions">
+                                    <button type="button" class="btn btn-outline-primary btn-sm edit-template me-2" 
+                                            data-template-name="{{ template_name[0] }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm delete-template" 
+                                            data-template-name="{{ template_name[0] }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="mb-4">
+
+                    <!-- Create/Edit Template Form -->
+                    <form method="POST" action="{{ url_for('save_template') }}" class="mb-3" id="template-form">
+                        {{ template_form.csrf_token }}
+                        <input type="hidden" name="is_edit" id="is_edit" value="false">
+                        
+                        <h4 class="section-title" id="template-form-title">
+                            <i class="fas fa-plus-circle me-2"></i>Create New Template
+                        </h4>
+                        
+                        <div class="mb-3">
+                            {{ template_form.name.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-tag"></i>
+                                </span>
+                                {{ template_form.name(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ template_form.subject.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-heading"></i>
+                                </span>
+                                {{ template_form.subject(class="form-control") }}
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Use {variable_name} for personalization
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ template_form.body.label(class="form-label") }}
+                            {{ template_form.body(class="form-control", rows=8) }}
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Use {variable_name} for personalization
+                            </small>
+                        </div>
+
+                        <div class="text-center">
+                            {{ template_form.submit(class="btn btn-success") }}
+                            <button type="button" class="btn btn-secondary ms-2" id="cancel-edit" style="display: none;">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
